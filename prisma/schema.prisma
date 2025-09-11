@@ -1,0 +1,43 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// 停车位模型
+model ParkingSpot {
+  id        String   @id @default(cuid())
+  spotId    String   @unique // 车位编号，如 "A1", "B2"
+  row       String   // 行标识，如 "A", "B", "C"
+  col       Int      // 列号，如 1, 2, 3
+  isOccupied Boolean @default(false) // 是否被占用
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  @@map("parking_spots")
+}
+
+// 车辆计数模型
+model VehicleCount {
+  id        String   @id @default(cuid())
+  totalSpots Int     @default(48) // 总车位数
+  occupiedCount Int  @default(0)  // 已占用车位数
+  timestamp DateTime @default(now())
+
+  @@map("vehicle_counts")
+}
+
+// 车辆进出记录模型
+model VehicleLog {
+  id        String   @id @default(cuid())
+  action    String   // "enter" 或 "exit"
+  timestamp DateTime @default(now())
+
+  @@map("vehicle_logs")
+}
