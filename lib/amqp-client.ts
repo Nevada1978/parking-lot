@@ -93,12 +93,18 @@ class AMQPClient {
     try {
       this.receiver = this.connection.open_receiver()
       
-      this.receiver.on('message', (context: any) => {
+      this.receiver.on('message', async (context: any) => {
         try {
           const msg = context.message
           const messageId = msg.message_id
           const topic = msg.application_properties?.topic
           const content = Buffer.from(msg.body.content).toString()
+          
+          // 过滤Topic：只处理来自设备 PRD_SSPU_II_25_G004 的消息
+          if (topic && !topic.includes('PRD_SSPU_II_25_G004')) {
+            context.delivery.accept()  // 确认消息但不处理
+            return
+          }
           
           console.log('收到 AMQP 消息:', {
             messageId,
@@ -107,8 +113,23 @@ class AMQPClient {
           })
 
           // 解析消息内容
-          const data: AMQPMessage = JSON.parse(content)
-          this.handleAMQPMessage(data)
+          try {
+            const rawData = JSON.parse(content)
+            
+            // 检查是否是USR设备的消息格式
+            if (rawData.method === 'thing.event.property.post' && rawData.params) {
+              // 转换USR设备消息格式
+              await this.handleUSRMessage(rawData)
+            } else {
+              // 处理标准AMQP消息格式
+              const data: AMQPMessage = rawData
+              await this.handleAMQPMessage(data)
+            }
+          } catch (parseError) {
+            console.error('解析消息JSON失败:', parseError)
+            context.delivery.reject()
+            return
+          }
           
           // 发送 ACK 确认
           context.delivery.accept()
@@ -197,6 +218,48 @@ class AMQPClient {
       
     } catch (error) {
       console.error('处理车辆计数更新失败:', error)
+    }
+  }
+
+  // 处理USR设备消息格式
+  private async handleUSRMessage(rawData: any) {
+    try {
+      console.log('🔄 处理USR设备消息...')
+      console.log('处理消息:', rawData)
+      
+      // 检查是否有停车位数据
+      if (rawData.params && rawData.params.parking_spot) {
+        const parkingSpot = rawData.params.parking_spot
+        
+        // 转换为标准消息格式
+        const convertedMessage: AMQPMessage = {
+          type: 'spot_status',
+          spot_id: parkingSpot.spot_id,
+          status: parkingSpot.status === '1' || parkingSpot.status === 1 ? 'occupied' : 'free',
+          timestamp: new Date().toISOString()
+        }
+        
+        console.log('✅ 停车位状态转换:', convertedMessage)
+        await this.handleAMQPMessage(convertedMessage)
+      }
+      
+      // 检查是否有车辆传感器数据
+      if (rawData.params && rawData.params.vehicle_sensor) {
+        const vehicleSensor = rawData.params.vehicle_sensor
+        
+        const convertedMessage: AMQPMessage = {
+          type: 'spot_status', 
+          spot_id: vehicleSensor.spot_id,
+          status: vehicleSensor.status === '1' || vehicleSensor.status === 1 ? 'occupied' : 'free',
+          timestamp: new Date().toISOString()
+        }
+        
+        console.log('✅ 车辆传感器转换:', convertedMessage)
+        await this.handleAMQPMessage(convertedMessage)
+      }
+      
+    } catch (error) {
+      console.error('❌ 处理USR消息失败:', error)
     }
   }
 

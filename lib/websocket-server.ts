@@ -3,7 +3,7 @@ import { createServer } from 'http'
 import { prisma } from './prisma'
 
 export interface WSMessage {
-  type: 'spot_update' | 'stats_update' | 'vehicle_log'
+  type: 'spot_update' | 'stats_update' | 'vehicle_log' | 'pong'
   data: any
   timestamp: string
 }
