@@ -1,0 +1,17 @@
+{
+  "method": "thing.event.property.post",
+  "id": "${timestamp}",
+  "params": {
+    "parking_spot": {
+      "spot_id": "A1",
+      "status": "${DI1}",
+      "sensor_type": "infrared"
+    },
+    "vehicle_sensor": {
+      "spot_id": "A2",
+      "status": "${DI2}",
+      "sensor_type": "magnetic"
+    }
+  },
+  "version": "1.0.0"
+}

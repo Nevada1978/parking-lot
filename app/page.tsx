@@ -98,7 +98,7 @@ export default function Home() {
             <ParkingLot3D spots={spots} onSpotClick={handleSpotClick} />
             
             <div className="mt-4 text-center text-sm text-gray-500">
-              点击车位可以切换占用状态（仅用于演示）• 系统每30秒自动模拟状态变化
+              点击车位可以切换占用状态（仅用于演示）
             </div>
           </div>
         </div>

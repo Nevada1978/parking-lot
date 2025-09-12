@@ -32,8 +32,11 @@ class AMQPClient {
       const consumerGroupId = process.env.AMQP_CONSUMER_GROUP_ID || 'DEFAULT_GROUP'
 
       if (!accessKey || !accessSecret || !host) {
-        console.log('AMQP配置不完整，使用模拟模式')
-        this.startSimulationMode()
+        console.error('❌ AMQP配置不完整，无法连接阿里云物联网平台')
+        console.error('请检查以下环境变量:')
+        console.error('- ALIBABA_CLOUD_ACCESS_KEY_ID')
+        console.error('- ALIBABA_CLOUD_ACCESS_KEY_SECRET') 
+        console.error('- AMQP_HOST')
         return
       }
 
@@ -72,9 +75,7 @@ class AMQPClient {
       this.connection.on('connection_error', (error: any) => {
         console.error('❌ AMQP 连接错误:', error)
         this.connected = false
-        // 如果连接失败，切换到模拟模式
-        console.log('切换到模拟模式...')
-        this.startSimulationMode()
+        console.error('请检查网络连接和AMQP配置参数')
       })
 
       this.connection.on('disconnected', () => {
@@ -84,8 +85,7 @@ class AMQPClient {
 
     } catch (error) {
       console.error('初始化 AMQP 客户端失败:', error)
-      console.log('启动模拟模式...')
-      this.startSimulationMode()
+      console.error('请检查网络连接和配置参数')
     }
   }
 
@@ -160,7 +160,7 @@ class AMQPClient {
       const isOccupied = data.status === 'occupied'
       
       // 更新数据库
-      const updatedSpot = await prisma.parkingSpot.update({
+      await prisma.parkingSpot.update({
         where: { spotId: data.spot_id },
         data: { isOccupied }
       })
@@ -198,49 +198,6 @@ class AMQPClient {
     } catch (error) {
       console.error('处理车辆计数更新失败:', error)
     }
-  }
-
-  // 模拟模式：定期生成随机的停车场状态变化
-  private startSimulationMode() {
-    console.log('🎭 启动模拟模式 - 将定期模拟停车场状态变化')
-    
-    // 每30秒模拟一次状态变化
-    setInterval(async () => {
-      try {
-        const spots = await prisma.parkingSpot.findMany()
-        if (spots.length === 0) return
-
-        // 随机选择1-2个车位改变状态
-        const spotsToChange = Math.floor(Math.random() * 2) + 1
-        const randomSpots = spots.sort(() => 0.5 - Math.random()).slice(0, spotsToChange)
-
-        for (const spot of randomSpots) {
-          const newStatus = !spot.isOccupied
-          
-          // 模拟 AMQP 消息
-          const mockMessage: AMQPMessage = {
-            type: 'spot_status',
-            spot_id: spot.spotId,
-            status: newStatus ? 'occupied' : 'free',
-            timestamp: new Date().toISOString()
-          }
-
-          console.log('🎭 模拟消息:', mockMessage)
-          await this.handleAMQPMessage(mockMessage)
-
-          // 如果是车辆进入/离开，也记录计数
-          const countMessage: AMQPMessage = {
-            type: 'vehicle_count',
-            action: newStatus ? 'enter' : 'exit',
-            timestamp: new Date().toISOString()
-          }
-
-          await this.handleAMQPMessage(countMessage)
-        }
-      } catch (error) {
-        console.error('模拟模式执行失败:', error)
-      }
-    }, 30000) // 30秒
   }
 
   public isConnected(): boolean {

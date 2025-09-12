@@ -15,7 +15,7 @@ console.log('📡 AMQP 客户端已初始化')
 console.log('=====================================')
 console.log('✅ 系统启动完成！')
 console.log(`📡 WebSocket 服务器: ws://localhost:${port}/ws`)
-console.log(`🔗 AMQP 连接状态: ${amqpClient.isConnected() ? '已连接' : '模拟模式'}`)
+console.log(`🔗 AMQP 连接状态: ${amqpClient.isConnected() ? '已连接' : '连接中...'}`)
 console.log('=====================================')
 
 // 优雅关闭处理
