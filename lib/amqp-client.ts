@@ -152,7 +152,7 @@ class AMQPClient {
 
   private async handleAMQPMessage(data: AMQPMessage) {
     try {
-      console.log('处理消息:', data)
+      // console.log('处理消息:', data)
 
       switch (data.type) {
         case 'spot_status':
@@ -186,7 +186,7 @@ class AMQPClient {
         data: { isOccupied }
       })
 
-      console.log(`车位 ${data.spot_id} 状态更新为: ${data.status}`)
+      // console.log(`车位 ${data.spot_id} 状态更新为: ${data.status}`)
 
       // 通过 WebSocket 广播更新
       await wsServer.broadcastSpotUpdate(data.spot_id)
@@ -211,7 +211,7 @@ class AMQPClient {
         }
       })
 
-      console.log(`记录车辆${data.action === 'enter' ? '进入' : '离开'}`)
+      // console.log(`记录车辆${data.action === 'enter' ? '进入' : '离开'}`)
 
       // 更新统计数据并广播
       await wsServer.broadcastStatsUpdate()
@@ -224,8 +224,8 @@ class AMQPClient {
   // 处理USR设备消息格式
   private async handleUSRMessage(rawData: any) {
     try {
-      console.log('🔄 处理USR设备消息...')
-      console.log('处理消息:', rawData)
+      // console.log('🔄 处理USR设备消息...')
+      // console.log('处理消息:', rawData)
       
       // 检查是否有停车位数据
       if (rawData.params && rawData.params.parking_spot) {
@@ -239,7 +239,7 @@ class AMQPClient {
           timestamp: new Date().toISOString()
         }
         
-        console.log('✅ 停车位状态转换:', convertedMessage)
+        // console.log('✅ 停车位状态转换:', convertedMessage)
         await this.handleAMQPMessage(convertedMessage)
       }
       
@@ -253,8 +253,8 @@ class AMQPClient {
           status: vehicleSensor.status === '1' || vehicleSensor.status === 1 ? 'occupied' : 'free',
           timestamp: new Date().toISOString()
         }
-        
-        console.log('✅ 车辆传感器转换:', convertedMessage)
+
+        // console.log('✅ 车辆传感器转换:', convertedMessage)
         await this.handleAMQPMessage(convertedMessage)
       }
       

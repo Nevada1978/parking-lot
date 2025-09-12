@@ -1,17 +1,20 @@
 {
-  "method": "thing.event.property.post",
-  "id": "${timestamp}",
   "params": {
-    "parking_spot": {
-      "spot_id": "A1",
-      "status": "${DI1}",
-      "sensor_type": "infrared"
+    "di1_status": {
+      "value": "DI1",
+      "name": "手动开关状态"
     },
-    "vehicle_sensor": {
-      "spot_id": "A2",
-      "status": "${DI2}",
-      "sensor_type": "magnetic"
+    "di2_status": {
+      "value": "DI2", 
+      "name": "自动传感器状态"
+    },
+    "do1_status": {
+      "value": "DO1",
+      "name": "黄灯状态"
+    },
+    "do2_status": {
+      "value": "DO2",
+      "name": "蓝灯状态"
     }
-  },
-  "version": "1.0.0"
+  }
 }
