@@ -41,3 +41,7 @@ yarn-error.log*
 next-env.d.ts
 
 /lib/generated/prisma
+
+# 敏感信息文件
+第一段.txt
+第二段.txt
