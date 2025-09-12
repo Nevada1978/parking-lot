@@ -17,8 +17,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`🎛️ API调用: 控制DO2 = ${state ? '高电平' : '低电平'}`);
-
     // 调用控制函数
     const result = await controlDO2(state);
 
@@ -44,7 +42,6 @@ export async function POST(request: NextRequest) {
     }
 
   } catch (error) {
-    console.error('❌ DO2控制API错误:', error);
     return NextResponse.json(
       { 
         success: false, 

@@ -77,13 +77,6 @@ export class IoTDeviceController {
         throw new Error('设备名称未配置，请设置 IOT_DEVICE_NAME 环境变量');
       }
 
-      // 调试信息
-      console.log('🔧 IoT控制配置信息:');
-      console.log('  - ProductKey:', this.productKey);
-      console.log('  - DeviceName:', this.deviceName);
-      console.log('  - InstanceId:', this.iotInstanceId);
-      console.log('  - Region:', process.env.IOT_REGION_ID);
-
       // 构建消息内容
       const messageContent = JSON.stringify(controlData);
       const base64Content = Buffer.from(messageContent).toString('base64');
@@ -106,25 +99,14 @@ export class IoTDeviceController {
 
       const request = new $Iot.PubRequest(requestParams);
 
-      console.log(`📤 发送控制指令到设备 ${this.deviceName}:`, controlData);
-      console.log(`📍 Topic: ${topicFullName}`);
-      console.log(`📋 Request:`, {
-        iotInstanceId: requestParams.iotInstanceId || '(不使用实例ID)',
-        productKey: request.productKey,
-        topicFullName: request.topicFullName,
-        messageContent: messageContent, // 显示原始消息内容
-      });
-
       // 发送消息
       const response = await this.client.pub(request);
-      
-      console.log('📨 API响应:', response.body);
       
       if (response.body?.success) {
         console.log('✅ 设备控制指令发送成功:', response.body.requestId);
         return true;
       } else {
-        console.error('❌ 设备控制指令发送失败:', response.body?.errorMessage || response.body?.code);
+        console.error('设备控制指令发送失败:', response.body?.errorMessage || response.body?.code);
         return false;
       }
 
